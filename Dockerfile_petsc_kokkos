@@ -30,35 +30,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python3.10-venv \
   python3.10-dev \
   wget \
+  valgrind \
+  vim \
   && rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
 WORKDIR /build
-ARG MPICH_DEVICE=ch3:nemesis
-ARG MPICH_VERSION=4.0.2
-RUN \
-  curl -O https://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz && \
-  tar xf mpich-${MPICH_VERSION}.tar.gz && \
-  rm mpich-${MPICH_VERSION}.tar.gz && \
-  cd mpich-${MPICH_VERSION} && \
-  ./configure \
-      FFLAGS=-fallow-argument-mismatch \
-      FCFLAGS=-fallow-argument-mismatch \
-      --disable-wrapper-rpath \
-      --with-device=${MPICH_DEVICE} \
-      --enable-error-checking=runtime \
-      --enable-error-messages=all \
-      --enable-g=meminit && \
-  make -j$(nproc) && \
-  make install && \
-  cd /build && \
-  rm -rf /build/mpich-${MPICH_VERSION} && \
-  ldconfig
-
-# Hide irrelevant MPICH output warnings
-ENV HWLOC_HIDE_ERRORS=2
 ARG PETSC_GIT_BRANCH=release
 
 # Have to build a venv for python as pip/numpy now complain
@@ -84,6 +63,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --download-fblaslapack \
     --download-kokkos \
     --download-kokkos-kernels \
+    --download-mpich \
     && \
   make
 
@@ -100,6 +80,7 @@ RUN cd petsc && \
     --download-kokkos \
     --download-kokkos-kernels \
     --with-64-bit-indices \
+    --download-mpich \
     && \
   make
 
