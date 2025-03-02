@@ -1,0 +1,25 @@
+ARG BASE_IMAGE=stevendargaville/petsc
+FROM ${BASE_IMAGE}
+
+# Reconfigure petsc with 64 bit ints
+ENV PETSC_DIR=/build/petsc
+ENV PETSC_ARCH=arch-linux-c-opt
+RUN cd petsc && \
+  OPT='-O2 -march=haswell -ffp-contract=fast'; \
+  python3 configure \
+    --with-debugging=0 COPTFLAGS="$OPT" CXXOPTFLAGS="$OPT" FOPTFLAGS="$OPT" \
+    --with-mpi-dir=/usr/local \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --with-petsc4py \
+    --with-64-bit-indices \
+    --force \
+    --with-clean \
+    && \
+  make
+
+WORKDIR /build/
+
+LABEL maintainer='Steven Dargaville'
+LABEL description='petsc_64_bit'
