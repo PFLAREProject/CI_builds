@@ -31,5 +31,5 @@ jobs:
         with:
           platforms: linux/amd64
           push: true
-          file: ./dockerfiles/Dockerfile_petsc
+          file: Dockerfile_petsc
           tags: stevendargaville/petsc:latest
