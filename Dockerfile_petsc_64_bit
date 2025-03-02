@@ -16,7 +16,6 @@ RUN cd petsc && \
     --with-64-bit-indices \
     --force \
     --with-clean \
-    --download-mpich \
     && \
   make
 
