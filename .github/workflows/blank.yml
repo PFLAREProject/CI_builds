@@ -33,3 +33,71 @@ jobs:
           push: true
           file: Dockerfile_petsc
           tags: stevendargaville/petsc:latest
+
+  build_petsc_64_bit:
+    runs-on: ubuntu-22.04
+    needs: setup
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}      
+      - name: Build Docker image for pull requests
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          push: true
+          file: Dockerfile_petsc_64_bit
+          tags: stevendargaville/petsc_64_bit:latest       
+          
+  build_petsc_intel:
+    runs-on: ubuntu-22.04
+    needs: setup
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}      
+      - name: Build Docker image for pull requests
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          push: true
+          file: Dockerfile_petsc_intel
+          tags: stevendargaville/petsc_intel:latest      
+          
+  build_petsc_kokkos:
+    runs-on: ubuntu-22.04
+    needs: setup
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}      
+      - name: Build Docker image for pull requests
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          push: true
+          file: Dockerfile_petsc_kokkos
+          tags: stevendargaville/petsc_kokkos:latest  
+          
+  build_petsc_nvidia:
+    runs-on: ubuntu-22.04
+    needs: setup
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}      
+      - name: Build Docker image for pull requests
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          push: true
+          file: Dockerfile_petsc_nvidia
+          tags: stevendargaville/petsc_nvidia:latest            
