@@ -72,7 +72,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN wget https://bootstrap.pypa.io/get-pip.py \
  && python3 ./get-pip.py && pip install numpy && pip install Cython && pip install setuptools
 
-# Install petsc
+# Install petsc with kokkos 32 bit
 ENV PETSC_DIR=/build/petsc
 ENV PETSC_ARCH=arch-linux-c-opt
 RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
@@ -89,7 +89,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     && \
   make
 
-# Install with kokkos
+# Install petsc with kokkos 64 bit
 ENV PETSC_ARCH=arch-linux-c-opt-64bit
 RUN cd petsc && \
   OPT='-O2 -march=haswell -ffp-contract=fast'; \
@@ -104,6 +104,22 @@ RUN cd petsc && \
     --with-64-bit-indices \
     && \
   make
+
+# Install petsc with kokkos omp backend
+ENV PETSC_ARCH=arch-linux-c-opt-omp
+RUN cd petsc && \
+  OPT='-O2 -march=haswell -ffp-contract=fast'; \
+  python3 configure \
+    --with-debugging=0 COPTFLAGS="$OPT" CXXOPTFLAGS="$OPT" FOPTFLAGS="$OPT" \
+    --with-mpi-dir=/usr/local \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --download-kokkos \
+    --download-kokkos-kernels \
+    --with-openmp \
+    && \
+  make  
 
 # Set the 32-bit int petsc as the default
 ENV PETSC_ARCH=arch-linux-c-opt
