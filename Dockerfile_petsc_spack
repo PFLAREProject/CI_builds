@@ -4,7 +4,12 @@ FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /build/
 
-RUN spack install -j4 petsc+kokkos
+RUN spack install -j4 petsc+kokkos && \
+    spack install python && \
+    spack install py-setuptools && \
+    spack install py-cython+py && \
+    spack install numpy && \
+    spack install py-petsc4py
 
 LABEL maintainer='Steven Dargaville'
 LABEL description='petsc_spack'
