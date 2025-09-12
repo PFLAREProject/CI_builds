@@ -1,0 +1,10 @@
+ARG BASE_IMAGE=spack/ubuntu-jammy
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /build/
+
+RUN spack install -j4 petsc+kokkos
+
+LABEL maintainer='Steven Dargaville'
+LABEL description='petsc_spack'
