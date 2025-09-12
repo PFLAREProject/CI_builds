@@ -7,8 +7,8 @@ WORKDIR /build/
 RUN spack install -j4 petsc+kokkos && \
     spack install python && \
     spack install py-setuptools && \
-    spack install py-cython+py && \
-    spack install numpy && \
+    spack install py-cython && \
+    spack install py-numpy && \
     spack install py-petsc4py
 
 LABEL maintainer='Steven Dargaville'
