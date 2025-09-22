@@ -4,12 +4,12 @@ FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /build/
 
-RUN spack install -j4 petsc+kokkos && \
-    spack install python && \
-    spack install py-setuptools && \
-    spack install py-cython && \
-    spack install py-numpy && \
-    spack install py-petsc4py
+# Build petsc with static libraries
+# and also petsc with dynamic libraries and kokkos
+# Pin the petsc4py install to the dynamic + kokkos build
+RUN spack install -j4 petsc~shared && \
+    spack install -j4 petsc+kokkos && \
+    spack install python py-setuptools py-cython py-numpy py-petsc4py ^petsc+kokkos
 
 LABEL maintainer='Steven Dargaville'
 LABEL description='petsc_spack'
