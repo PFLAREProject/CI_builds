@@ -62,7 +62,7 @@ RUN \
 # Hide irrelevant MPICH output warnings
 ENV HWLOC_HIDE_ERRORS=2
 # Oldest petsc we currently support
-ARG PETSC_GIT_BRANCH=v3.23.1
+ARG PETSC_GIT_BRANCH=v3.24.0
 
 # Have to build a venv for python as pip/numpy now complain
 ENV VIRTUAL_ENV=/my-venv
