@@ -73,6 +73,8 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
  && python3 ./get-pip.py && pip install numpy && pip install Cython && pip install setuptools
 
 # Install petsc with kokkos 32 bit
+# Added --with-strict-petscerrorcode as the PETSc CI enforces it 
+# and otherwise our kokkos builds fail there.
 ENV PETSC_DIR=/build/petsc
 ENV PETSC_ARCH=arch-linux-c-opt
 RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
@@ -86,6 +88,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --download-fblaslapack \
     --download-kokkos \
     --download-kokkos-kernels \
+    --with-strict-petscerrorcode \
     && \
   make
 
