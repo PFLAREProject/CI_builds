@@ -75,6 +75,8 @@ RUN wget https://bootstrap.pypa.io/get-pip.py \
 # Install petsc with kokkos 32 bit
 # Added --with-strict-petscerrorcode as the PETSc CI enforces it 
 # and otherwise our kokkos builds fail there.
+# Also added with-clanguage=cxx so that it uses a cxx compiler instead of a c
+# and hence --with-strict-petscerrorcode also applies to C code
 ENV PETSC_DIR=/build/petsc
 ENV PETSC_ARCH=arch-linux-c-opt
 RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
@@ -89,6 +91,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --download-kokkos \
     --download-kokkos-kernels \
     --with-strict-petscerrorcode \
+    --with-clanguage=cxx \
     && \
   make
 
