@@ -50,7 +50,7 @@ RUN apt update && apt install -y --no-install-recommends intel-basekit intel-hpc
 ENV LD_LIBRARY_FLAGS="-L/opt/intel/oneapi/compiler/latest/lib/"
 
 WORKDIR /build
-ARG PETSC_GIT_BRANCH=release
+ARG PETSC_GIT_BRANCH=main
 
 # Have to build a venv for python as pip/numpy now complain
 ENV VIRTUAL_ENV=/my-venv

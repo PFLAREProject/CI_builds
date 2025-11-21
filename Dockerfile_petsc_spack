@@ -7,9 +7,9 @@ WORKDIR /build/
 # Build petsc with static libraries
 # and also petsc with dynamic libraries and kokkos
 # Pin the petsc4py install to the dynamic + kokkos build
-RUN spack install -j4 petsc~shared && \
-    spack install -j4 petsc+kokkos && \
-    spack install python py-setuptools py-cython py-numpy py-petsc4py ^petsc+kokkos
+RUN spack install -j4 petsc@main~shared && \
+    spack install -j4 petsc@main+kokkos && \
+    spack install python py-setuptools py-cython py-numpy py-petsc4py ^petsc@main+kokkos
 
 LABEL maintainer='Steven Dargaville'
 LABEL description='petsc_spack'
