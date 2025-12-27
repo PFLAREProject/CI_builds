@@ -95,7 +95,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     && \
   make
 
-# Install petsc with kokkos 64 bit
+# Install petsc with kokkos 64 bit and mpif08 module use
 ENV PETSC_ARCH=arch-linux-c-opt-64bit
 RUN cd petsc && \
   OPT='-O2 -march=haswell -ffp-contract=fast'; \
@@ -108,6 +108,7 @@ RUN cd petsc && \
     --download-kokkos \
     --download-kokkos-kernels \
     --with-64-bit-indices \
+    --with-mpi-ftn-module=mpi_f08 \
     && \
   make
 
