@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:22.04
+ARG BASE_IMAGE=ubuntu:24.04
 FROM ${BASE_IMAGE}
 
 RUN echo Etc/UTC > /etc/timezone && ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime
@@ -26,9 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   pkg-config \
   ripgrep \
   zlib1g-dev \
-  python3-virtualenv \
-  python3.10-venv \
-  python3.10-dev \
+  python3 \
+  python3-venv \
+  python3-dev \
+  python3-pip \
   wget \
   valgrind \
   vim \  
@@ -68,9 +69,7 @@ ENV VIRTUAL_ENV=/my-venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Install python packages (should be in the venv not globally)
-RUN wget https://bootstrap.pypa.io/get-pip.py \
- && python3 ./get-pip.py && pip install numpy && pip install Cython && pip install setuptools
+RUN pip install --no-cache-dir numpy Cython setuptools
 
 # Install petsc with kokkos 32 bit
 # Added --with-strict-petscerrorcode as the PETSc CI enforces it 
