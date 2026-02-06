@@ -12,6 +12,7 @@ RUN cd petsc && \
     --download-metis \
     --download-parmetis \
     --download-fblaslapack \
+    --download-triangle \
     --with-petsc4py \
     --with-64-bit-indices \
     --force \
