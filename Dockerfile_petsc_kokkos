@@ -94,6 +94,20 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     && \
   make
 
+# Install petsc with debugging and kokkos
+ENV PETSC_ARCH=arch-linux-c-debug
+RUN cd petsc && \
+  python3 configure \
+    --with-debugging=1 \
+    --with-mpi-dir=/usr/local \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --download-kokkos \
+    --download-kokkos-kernels \
+    && \
+  make  
+
 # Install petsc with kokkos 64 bit and mpif08 module use
 ENV PETSC_ARCH=arch-linux-c-opt-64bit
 RUN cd petsc && \
