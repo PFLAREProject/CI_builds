@@ -89,7 +89,6 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
   make
 
 # Install debug petsc
-# Also enable a prefix install location
 ENV PETSC_ARCH=arch-linux-c-debug
 RUN cd petsc && \
   python3 configure \
@@ -100,6 +99,21 @@ RUN cd petsc && \
     --download-fblaslapack \
     --download-triangle \
     --with-petsc4py \
+    && \
+  make  
+
+# Install debug petsc
+# Enable a prefix install location
+ENV PETSC_ARCH=arch-linux-c-debug-prefix
+RUN cd petsc && \
+  python3 configure \
+    --with-debugging=1 \
+    --with-mpi-dir=/usr/local \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --download-triangle \
+    --with-petsc4py \    
     --prefix=/build/petsc_prefix \
     && \
   make && make install
