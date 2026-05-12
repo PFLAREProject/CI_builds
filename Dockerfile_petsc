@@ -102,22 +102,6 @@ RUN cd petsc && \
     && \
   make  
 
-# Install debug petsc
-# Enable a prefix install location
-ENV PETSC_ARCH=arch-linux-c-debug-prefix
-RUN cd petsc && \
-  python3 configure \
-    --with-debugging=1 \
-    --with-mpi-dir=/usr/local \
-    --download-metis \
-    --download-parmetis \
-    --download-fblaslapack \
-    --download-triangle \
-    --with-petsc4py \    
-    --prefix=/build/petsc_prefix \
-    && \
-  make && make install
-
 # Set the optimised petsc as the default
 ENV PETSC_ARCH=arch-linux-c-opt
 

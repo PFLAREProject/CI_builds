@@ -106,7 +106,23 @@ RUN cd petsc && \
     --download-kokkos \
     --download-kokkos-kernels \
     && \
-  make  
+  make
+
+# Install petsc with debugging and kokkos
+# Prefix install location
+ENV PETSC_ARCH=arch-linux-c-debug-prefix
+RUN cd petsc && \
+  python3 configure \
+    --with-debugging=1 \
+    --with-mpi-dir=/usr/local \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --download-kokkos \
+    --download-kokkos-kernels \
+    --prefix=/build/petsc_prefix \
+    && \
+  make && make install 
 
 # Install petsc with kokkos 64 bit and mpif08 module use
 ENV PETSC_ARCH=arch-linux-c-opt-64bit
