@@ -1,0 +1,75 @@
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+RUN echo Etc/UTC > /etc/timezone && ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  autoconf \
+  automake \
+  bash-completion \
+  ca-certificates \
+  chrpath \
+  cmake \
+  curl \
+  g++ \
+  gcc \
+  gfortran \
+  git \
+  less \
+  libblis-serial-dev \
+  liblapack-dev \
+  libtool \
+  locales \
+  m4 \
+  make \
+  openssl \
+  pkg-config \
+  ripgrep \
+  zlib1g-dev \
+  python3 \
+  python3-venv \
+  python3-dev \
+  python3-pip \
+  wget \
+  valgrind \
+  vim \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+
+WORKDIR /build
+ARG PETSC_GIT_BRANCH=main
+
+# Have to build a venv for python as pip/numpy now complain
+ENV VIRTUAL_ENV=/my-venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install --no-cache-dir numpy Cython setuptools
+
+# Install petsc with debugging and kokkos, no MPI (serial MPIUNI), 32 bit
+# --with-mpi=0 gives a serial build using PETSc's MPIUNI stub.
+# ParMETIS is an MPI library and cannot configure without MPI, so only serial
+# METIS is downloaded here.
+ENV PETSC_DIR=/build/petsc
+ENV PETSC_ARCH=arch-linux-c-debug
+RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
+  cd petsc && \
+  python3 configure \
+    --with-debugging=1 \
+    --with-mpi=0 \
+    --download-metis \
+    --download-fblaslapack \
+    --download-kokkos \
+    --download-kokkos-kernels \
+    && \
+  make
+
+# Set the 32-bit int debug petsc as the default
+ENV PETSC_ARCH=arch-linux-c-debug
+
+WORKDIR /build/
+
+LABEL maintainer='Steven Dargaville'
+LABEL description='petsc_no_mpi'
