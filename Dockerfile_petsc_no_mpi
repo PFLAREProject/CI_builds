@@ -63,6 +63,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --download-fblaslapack \
     --download-kokkos \
     --download-kokkos-kernels \
+    --with-petsc4py \
     && \
   make
 
