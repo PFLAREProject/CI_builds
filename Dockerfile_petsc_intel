@@ -46,8 +46,21 @@ SHELL ["/bin/bash", "-c"]
 RUN wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB && rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 RUN echo "deb https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/oneAPI.list
-# intel-hpckit already bundles the Fortran compiler (ifx/mpiifx)
-RUN apt update && apt install -y --no-install-recommends intel-basekit intel-hpckit && cd /opt/intel/oneapi && rm -rf vtune ipp dnnl dpcpp-ct debugger dal advisor ccl mkl umf tbb pti ippcp dpl
+# Pin the whole Intel toolchain to the 2025.3 line for a reproducible, single-version
+# install. The metapackages must NOT be left unversioned: intel-hpckit hard-pins the
+# Fortran compiler to intel-oneapi-compiler-fortran-2025.3, but intel-basekit pulls the
+# C/C++ compiler via a floating "intel-oneapi-compiler-dpcpp-cpp (>= 2025.3.3)" dep,
+# which resolves to the newest release (2026.1). That mismatch (a) installs two full
+# compiler trees and fills the runner disk ("No space left on device"), and (b) points
+# /opt/intel/oneapi/compiler/latest at 2026.1, which ships icx/icpx but no ifx, so
+# mpiifx cannot be found. Pinning dpcpp-cpp to 2025.3.3-30 (== the fortran version)
+# keeps latest at 2025.3 and everything aligned. intel-hpckit provides ifx/mpiifx, so
+# the standalone intel-oneapi-compiler-fortran metapackage is not needed.
+RUN apt update && apt install -y --no-install-recommends \
+    intel-basekit=2025.3.2-19 \
+    intel-hpckit=2025.3.1-52 \
+    intel-oneapi-compiler-dpcpp-cpp=2025.3.3-30 \
+  && cd /opt/intel/oneapi && rm -rf vtune ipp dnnl dpcpp-ct debugger dal advisor ccl mkl umf tbb pti ippcp dpl
 ENV LD_LIBRARY_FLAGS="-L/opt/intel/oneapi/compiler/latest/lib/"
 
 WORKDIR /build
