@@ -58,10 +58,17 @@ RUN echo "deb https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/source
 # The versions below match the last image that built successfully (basekit 2025.3.1-33,
 # compilers 2025.3.2-832, Intel MPI 2021.17.2-91) and are mutually satisfiable:
 # base-toolkit 2025.3.1 needs dpcpp ">=2025.3.2", hpc-toolkit needs mpi-devel ">=2021.17.2".
-# intel-hpckit provides ifx/mpiifx, so the standalone compiler-fortran metapackage is not needed.
+# NOTE: the *-kit packages (intel-basekit/intel-hpckit) are thin metapackages that depend
+# on intel-oneapi-base-toolkit/intel-oneapi-hpc-toolkit with ">=" bounds, so pinning only
+# the kit lets the underlying toolkit float up to 2025.3.2, which then demands dpcpp
+# ">=2025.3.3" and conflicts with our compiler pin. We therefore pin the toolkit packages
+# explicitly too. intel-hpckit provides ifx/mpiifx, so the standalone compiler-fortran
+# metapackage is not needed.
 RUN apt update && apt install -y --no-install-recommends \
     intel-basekit=2025.3.1-33 \
+    intel-oneapi-base-toolkit=2025.3.1-33 \
     intel-hpckit=2025.3.1-52 \
+    intel-oneapi-hpc-toolkit=2025.3.1-52 \
     intel-oneapi-compiler-dpcpp-cpp=2025.3.2-832 \
     intel-oneapi-compiler-fortran-2025.3=2025.3.2-832 \
     intel-oneapi-mpi-devel=2021.17.2-91 \
