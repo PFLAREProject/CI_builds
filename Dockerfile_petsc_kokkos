@@ -108,7 +108,7 @@ RUN cd petsc && \
     && \
   make
 
-# Install petsc with debugging and kokkos
+# Install petsc with debugging and kokkos and single precision
 # Prefix install location
 ENV PETSC_ARCH=arch-linux-c-debug-prefix
 RUN cd petsc && \
@@ -121,6 +121,7 @@ RUN cd petsc && \
     --download-kokkos \
     --download-kokkos-kernels \
     --prefix=/build/petsc_prefix \
+    --with-precision=single \
     && \
   make && make install 
 
