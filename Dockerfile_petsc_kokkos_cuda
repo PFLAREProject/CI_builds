@@ -69,6 +69,11 @@ ARG CUDA_ARCH=86
 # It lives in a scratch dir that is deleted at the end of this step, so nothing
 # in the final image can shadow the real libcuda.so.1 the NVIDIA container
 # runtime injects on a GPU host. (PETSc itself links the stub without an rpath.)
+#
+# The GPU CI runner (Cirun) runs as an unprivileged user inside this image and
+# 'make check' compiles and runs the examples in the PETSc tree, so the tree is
+# made world-writable. Done in the same layer as the build: a separate chmod
+# layer would copy every file and double the image size.
 ENV PETSC_DIR=/build/petsc
 ENV PETSC_ARCH=arch-linux-c-debug
 RUN mkdir -p /build/cuda_stubs && \
@@ -89,7 +94,8 @@ RUN mkdir -p /build/cuda_stubs && \
     --with-petsc4py \
     && \
   make && \
-  rm -rf /build/cuda_stubs
+  rm -rf /build/cuda_stubs && \
+  chmod -R a+rwX /build/petsc
 
 # The downloaded MPICH lives in the PETSc arch directory
 ENV PATH="$PETSC_DIR/$PETSC_ARCH/bin:$PATH"
