@@ -61,9 +61,20 @@ ARG CUDA_ARCH=89
 # MPICH is downloaded by PETSc rather than built by hand so that it is
 # configured against the same CUDA toolkit and arch (i.e. GPU-aware MPI).
 # No 'make check' here - that needs a GPU and is run in the GPU CI job.
+#
+# There is no GPU driver on the build runner, so libcuda.so.1 does not exist.
+# The CUDA-aware MPICH's libmpi.so depends on libcuda.so.1, and the linker must
+# resolve that when linking any MPI executable (configure's link tests included),
+# so give it a build-only libcuda.so.1 -> toolkit stub symlink via LD_LIBRARY_PATH.
+# It lives in a scratch dir that is deleted at the end of this step, so nothing
+# in the final image can shadow the real libcuda.so.1 the NVIDIA container
+# runtime injects on a GPU host. (PETSc itself links the stub without an rpath.)
 ENV PETSC_DIR=/build/petsc
 ENV PETSC_ARCH=arch-linux-c-debug
-RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
+RUN mkdir -p /build/cuda_stubs && \
+  ln -s /usr/local/cuda/lib64/stubs/libcuda.so /build/cuda_stubs/libcuda.so.1 && \
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/build/cuda_stubs" && \
+  git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
   cd petsc && \
   python3 configure \
     --with-debugging=1 \
@@ -77,7 +88,8 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --with-cuda-arch=${CUDA_ARCH} \
     --with-petsc4py \
     && \
-  make
+  make && \
+  rm -rf /build/cuda_stubs
 
 # The downloaded MPICH lives in the PETSc arch directory
 ENV PATH="$PETSC_DIR/$PETSC_ARCH/bin:$PATH"
