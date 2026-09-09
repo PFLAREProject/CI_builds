@@ -1,0 +1,103 @@
+# PETSc + Kokkos with the CUDA backend, built on a CPU-only runner.
+# The -devel tag is required as -base/-runtime do not ship nvcc.
+ARG BASE_IMAGE=nvidia/cuda:12.8.2-devel-ubuntu24.04
+FROM ${BASE_IMAGE}
+
+RUN echo Etc/UTC > /etc/timezone && ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  autoconf \
+  automake \
+  bash-completion \
+  ca-certificates \
+  chrpath \
+  cmake \
+  curl \
+  g++ \
+  gcc \
+  gfortran \
+  git \
+  less \
+  libblis-serial-dev \
+  liblapack-dev \
+  libtool \
+  locales \
+  m4 \
+  make \
+  openssl \
+  pkg-config \
+  ripgrep \
+  zlib1g-dev \
+  python3 \
+  python3-venv \
+  python3-dev \
+  python3-pip \
+  wget \
+  valgrind \
+  vim \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+
+WORKDIR /build
+ARG PETSC_GIT_BRANCH=main
+
+# Have to build a venv for python as pip/numpy now complain
+ENV VIRTUAL_ENV=/my-venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install --no-cache-dir numpy Cython setuptools
+
+# CUDA compute capability to compile for. There is no GPU on the build runner,
+# so this must be given explicitly: with --with-cuda-arch set, PETSc configure
+# skips its deviceQuery/runtime probe of the hardware. The value is passed on
+# to Kokkos and to the downloaded MPICH (--with-cuda-sm), so all three agree.
+# This MUST match the GPU model the image is later run on (86 = RTX 3090).
+ARG CUDA_ARCH=86
+
+# Install petsc with debugging and kokkos CUDA backend, 32 bit
+# MPICH is downloaded by PETSc rather than built by hand so that it is
+# configured against the same CUDA toolkit and arch (i.e. GPU-aware MPI).
+# No 'make check' here - that needs a GPU and is run in the GPU CI job.
+#
+# There is no GPU driver on the build runner, so libcuda.so.1 does not exist.
+# The CUDA-aware MPICH's libmpi.so depends on libcuda.so.1, and the linker must
+# resolve that when linking any MPI executable (configure's link tests included),
+# so give it a build-only libcuda.so.1 -> toolkit stub symlink via LD_LIBRARY_PATH.
+# It lives in a scratch dir that is deleted at the end of this step, so nothing
+# in the final image can shadow the real libcuda.so.1 the NVIDIA container
+# runtime injects on a GPU host. (PETSc itself links the stub without an rpath.)
+ENV PETSC_DIR=/build/petsc
+ENV PETSC_ARCH=arch-linux-c-debug
+RUN mkdir -p /build/cuda_stubs && \
+  ln -s /usr/local/cuda/lib64/stubs/libcuda.so /build/cuda_stubs/libcuda.so.1 && \
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/build/cuda_stubs" && \
+  git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/petsc.git && \
+  cd petsc && \
+  python3 configure \
+    --with-debugging=1 \
+    --download-mpich \
+    --download-metis \
+    --download-parmetis \
+    --download-fblaslapack \
+    --download-kokkos \
+    --download-kokkos-kernels \
+    --with-cuda=1 \
+    --with-cuda-arch=${CUDA_ARCH} \
+    --with-petsc4py \
+    && \
+  make && \
+  rm -rf /build/cuda_stubs
+
+# The downloaded MPICH lives in the PETSc arch directory
+ENV PATH="$PETSC_DIR/$PETSC_ARCH/bin:$PATH"
+
+# Hide irrelevant MPICH output warnings
+ENV HWLOC_HIDE_ERRORS=2
+
+WORKDIR /build/
+
+LABEL maintainer='Steven Dargaville'
+LABEL description='petsc_kokkos_cuda'
