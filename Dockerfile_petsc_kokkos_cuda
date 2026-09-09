@@ -54,8 +54,8 @@ RUN pip install --no-cache-dir numpy Cython setuptools
 # so this must be given explicitly: with --with-cuda-arch set, PETSc configure
 # skips its deviceQuery/runtime probe of the hardware. The value is passed on
 # to Kokkos and to the downloaded MPICH (--with-cuda-sm), so all three agree.
-# This MUST match the GPU model the image is later run on (89 = RTX 4090).
-ARG CUDA_ARCH=89
+# This MUST match the GPU model the image is later run on (86 = RTX 3090).
+ARG CUDA_ARCH=86
 
 # Install petsc with debugging and kokkos CUDA backend, 32 bit
 # MPICH is downloaded by PETSc rather than built by hand so that it is
