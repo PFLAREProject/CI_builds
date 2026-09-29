@@ -13,6 +13,7 @@ RUN cd petsc && \
     --download-parmetis \
     --download-fblaslapack \
     --download-triangle \
+    --download-tetgen \
     --with-petsc4py \
     --with-64-bit-indices \
     --force \

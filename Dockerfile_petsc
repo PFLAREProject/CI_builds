@@ -84,6 +84,7 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
     --download-parmetis \
     --download-fblaslapack \
     --download-triangle \
+    --download-tetgen \
     --with-petsc4py \
     && \
   make
@@ -98,6 +99,7 @@ RUN cd petsc && \
     --download-parmetis \
     --download-fblaslapack \
     --download-triangle \
+    --download-tetgen \
     --with-petsc4py \
     && \
   make  
